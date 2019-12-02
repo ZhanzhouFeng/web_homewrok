@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style>
+			body {
+				margin: 0;
+			}
+			ul {
+				margin: 0;
+				padding: 0;
+				list-style: none;
+			}
+			
+			#div #list {
+				width: 780px;
+				height: 500px;
+				margin-top: 10px;
+				/* border: 1px solid #000; */
+				overflow: hidden;
+				position: relative;
+				
+			}
+			#list li {
+				float: left;
+				margin: 10px;
+				width: 240px;
+				height: 135px;
+				z-index: 1;
+			}
+			.active {
+				border: 2px solid #00FFFF;
+            }
+            .wall img {
+            width: 100%;
+            height: auto;
+        }
+		</style>
+	</head>
+	<body background="img/main.jpg"> 
+		<div id="div">
+			<input type="button" value="随机排序" id="btn"/>
+			<ul id="list" class="wall">
+				<li><img src="img/1.jpg"/></li>
+				<li><img src="img/2.jpg"/></li>
+				<li><img src="img/3.jpg"/></li>
+				<li><img src="img/4.jpg"/></li>
+				<li><img src="img/5.jpg"/></li>
+				<li><img src="img/6.jpg"/></li>
+				<li><img src="img/7.jpg"/></li>
+				<li><img src="img/8.jpg"/></li>
+				<li><img src="img/9.jpg"/></li>
+			</ul>
+		</div>
+		
+	</body>
+</html>

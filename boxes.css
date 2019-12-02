@@ -1,0 +1,25 @@
+/* Note that the body element has predefined margin and padding that in this
+case we want to get rid of */
+body {
+    margin: 10;
+    padding: 10;
+  }
+  
+  #inner-box {
+    /* Can also use "border" to set all the border styles in one line */
+    /* border: 50px solid pink; */
+    border-width: 50px;
+    border-style: solid;
+    border-color: pink;
+    background-color: salmon;
+    height: 200px;
+    width: 200px;
+  }
+  
+  #outer-box {
+    background-color: teal;
+    padding: 50px;
+    height: 300px;
+    width: 300px;
+  }
+
