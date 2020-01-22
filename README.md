@@ -7,6 +7,9 @@ web开发课程的课程作业<br>
 ![](https://github.com/ZhanzhouFeng/web_homewrok/blob/master/photo/%E5%9B%BE%E7%89%871.png)  
 ## 第二次作业：<br>
 seven puzzle小游戏
-
+![](https://github.com/ZhanzhouFeng/web_homewrok/blob/master/photo/%E5%9B%BE%E7%89%872.png)  
 ## 第三次作业：<br>
 基于WebGL的第一人称网页游戏
+![](https://github.com/ZhanzhouFeng/web_homewrok/blob/master/photo/%E5%9B%BE%E7%89%873.png)  
+![](https://github.com/ZhanzhouFeng/web_homewrok/blob/master/photo/%E5%9B%BE%E7%89%874.png)  
+![](https://github.com/ZhanzhouFeng/web_homewrok/blob/master/photo/%E5%9B%BE%E7%89%875.png)  
