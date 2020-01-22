@@ -1,0 +1,25 @@
+CREATE DATABASE web_hm;
+use web_hm;
+
+CREATE TABLE test_db (
+  `cid` varchar(7) NOT NULL,
+  `cname` varchar(10) NOT NULL,
+  PRIMARY KEY (`cid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE cube (
+    y float not null,
+	`id` int(11) NOT NULL AUTO_INCREMENT,
+    x float not null,
+    z float not null,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+insert into cube(x,y,z) value(1,11,1);
+select * from cube;
+select *;
+
+set unique_checks=1; 
+set sql_safe_updates=0;
+DELETE FROM cube ;

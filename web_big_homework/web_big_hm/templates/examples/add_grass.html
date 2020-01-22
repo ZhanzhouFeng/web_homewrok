@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>第三次大作业</title>
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            background-color: #ffffff;
+            margin: 0;
+            overflow: hidden;
+            font-family: arial;
+        }
+
+        #blocker {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        #instructions {
+            width: 100%;
+            height: 100%;
+
+            display: -webkit-box;
+            display: -moz-box;
+            display: box;
+
+            -webkit-box-orient: horizontal;
+            -moz-box-orient: horizontal;
+            box-orient: horizontal;
+
+            -webkit-box-pack: center;
+            -moz-box-pack: center;
+            box-pack: center;
+
+            -webkit-box-align: center;
+            -moz-box-align: center;
+            box-align: center;
+
+            color: #ffffff;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        /*右上角*/
+        div.right_top {
+            left: 10px;
+            top: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: #ffffff;
+            overflow: hidden;
+            z-index: 9999;
+            position: fixed;
+            padding: 1px;
+            text-align: center;
+            width: 225px;
+            height: 162px;
+            border-bottom-left-radius: 4px;
+            border-bottom-right-radius: 4px;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+        }
+
+        #bs_h {
+            color: white;
+            white-space: nowrap;
+            margin-top: 24px;
+        }
+
+        #now_h {
+            color: white;
+            white-space: nowrap;
+            margin-top: 24px;
+        }
+
+        .zhezhao {
+            /*display: none;*/
+            position: fixed;
+            left: 0px;
+            top: 0px;
+            background: #000;
+            width: 100%;
+            height: 100%;
+            opacity: 0.6;
+            z-index: 99999;
+        }
+
+        .tankuang {
+            /*display: none;*/
+            position: relative;
+            background: #fff;
+            width: 30%;
+            height: 70%;
+            border-radius: 5px;
+            margin: 5% auto;
+            z-index: 99999;
+
+        }
+
+        #header {
+            height: 40px;
+        }
+
+        #header-right {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            border-radius: 5px;
+            background: red;
+            color: #fff;
+            right: 5px;
+            top: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+<div class="right_top">
+    <table border="0">
+        <tr>
+            <th>
+                <h2> &nbsp; 最佳高度：</h2>
+            </th>
+            <th>
+                <h2 id='bs_h'>0 </h2>
+
+            </th>
+        </tr>
+        <tr>
+            <td>
+                <h2> &nbsp; 当前高度：</h2>
+            </td>
+            <td>
+                <h2 id='now_h'>0</h2>
+
+            </td>
+        </tr>
+    </table>
+</div>
+<div id="blocker">
+
+    <div id="instructions">
+        <span style="font-size:40px">Click to play</span>
+        <br/>
+        (W, A, S, D = Move, SPACE = Jump, MOUSE = Look around)
+    </div>
+
+</div>
+<div class="zhezhao" id='zhezhao'>
+
+</div>
+<div class="tankuang" id="tankuang">
+    <div id="header">
+        <div id="header-right" onclick="hidder()">x</div>
+    </div>
+    <center><img src="static/images/congratulation.png" style="width:60%;"></center>
+    <br>
+    <center><img src="static/images/pass.jpg" style="width:40%;"></center>
+    <br>
+</div>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/three.js/r67/three.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/stats.js/r11/Stats.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5/dat.gui.min.js"></script>
+<script type="text/javascript" src="static/libs/three.js"></script>
+<script type="text/javascript" src="static/libs/OrbitControls.js"></script>
+<script type="text/javascript" src="../static/libs/PointerLockControls.js"></script>
+<script type="text/javascript" src="../static/libs/SunLight.js"></script>
+<script type="text/javascript" src='../static/libs/threex.grass.js'></script>
+<script>
+    document.getElementById('zhezhao').style.display = "none";
+    document.getElementById('tankuang').style.display = "none";
+    var camera, scene, renderer;
+    renderer = new THREE.WebGLRenderer();
+    var geometry, smaterial, mesh;
+    var controls;
+    var scene_color = 0x3AA0EA;
+    var sun_color = "#ffffff"
+    var sun_posi = new THREE.Vector3(10, 20, 10)
+    var onRenderFcts = [];
+    var cubes = {{Cubes | safe}};
+    // console.log(cubes)
+    var objects = [];
+
+    var ray;
+
+    var blocker = document.getElementById('blocker');
+    var instructions = document.getElementById('instructions');
+
+    // http://www.html5rocks.com/en/tutorials/pointerlock/intro/
+    //指针锁定(以前叫做鼠标锁定) 是一种输入方法，这种方法是基于指针的相对位移（movement），而不是绝对位置，而不仅是指针的绝对位置。此API将鼠标指针锁定到特定元素上（同时将指针光标从视图中移除），并获取原始的指针位移，这样就能不受元素边界的约束而无限移动，且不会移出元素。
+
+    var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
+
+    //鼠标移动事件
+    //判断是否支持鼠标锁定
+    if (havePointerLock) {
+        var element = document.body;
+        var pointerlockchange = function (event) {
+
+            if (document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element) {
+                controls.enabled = true;
+                blocker.style.display = 'none';
+            } else {
+                controls.enabled = false;
+                blocker.style.display = '-webkit-box';
+                blocker.style.display = '-moz-box';
+                blocker.style.display = 'box';
+                instructions.style.display = '';
+            }
+        }
+
+        var pointerlockerror = function (event) {
+            instructions.style.display = '';
+        }
+
+        // Hook pointer lock state change events
+        document.addEventListener('pointerlockchange', pointerlockchange, false);
+        document.addEventListener('mozpointerlockchange', pointerlockchange, false);
+        document.addEventListener('webkitpointerlockchange', pointerlockchange, false);
+
+        document.addEventListener('pointerlockerror', pointerlockerror, false);
+        document.addEventListener('mozpointerlockerror', pointerlockerror, false);
+        document.addEventListener('webkitpointerlockerror', pointerlockerror, false);
+        //点击事件，用于激活
+        instructions.addEventListener('click', function (event) {
+            instructions.style.display = 'none';
+
+            // Ask the browser to lock the pointer
+            element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+
+            if (/Firefox/i.test(navigator.userAgent)) {
+                var fullscreenchange = function (event) {
+
+                    if (document.fullscreenElement === element || document.mozFullscreenElement === element || document.mozFullScreenElement === element) {
+                        document.removeEventListener('fullscreenchange', fullscreenchange);
+                        document.removeEventListener('mozfullscreenchange', fullscreenchange);
+                        element.requestPointerLock();
+                    }
+                }
+
+                document.addEventListener('fullscreenchange', fullscreenchange, false);
+                document.addEventListener('mozfullscreenchange', fullscreenchange, false);
+
+                element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen;
+                element.requestFullscreen();
+
+            } else {
+                element.requestPointerLock();
+            }
+        }, false);
+    } else {
+        instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
+    }
+
+    init();
+    animate();
+
+    function init() {
+        // root = new THREE.Object3D();
+        // scene.add(root);
+        //该构造函数总共有四个参数，分别是fov，aspect，near，far 。fov表示摄像机视锥体垂直视野角度，最小值为0，最大值为180，默认值为50，实际项目中一般都定义45，因为45最接近人正常睁眼角度；aspect表示摄像机视锥体长宽比，默认长宽比为1，即表示看到的是正方形，实际项目中使用的是屏幕的宽高比；near表示摄像机视锥体近端面，这个值默认为0.1，实际项目中都会设置为1；far表示摄像机视锥体远端面，默认为2000，这个值可以是无限的，说的简单点就是我们视觉所能看到的最远距离。
+
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+        //创建一个场景（场景是一个容器，用于保存、跟踪所要渲染的物体和使用的光源）
+
+        scene = new THREE.Scene();
+        scene.fog = new THREE.Fog(scene_color, 0, 50);
+        // scene.fog = new THREE.Fog('0xF5F5F5', 0, 750);
+
+        controls = new THREE.PointerLockControls(camera);
+        scene.add(controls.getObject());
+        //由于浏览器是一个2d视口，而在里面显示three.js的内容是3d场景，所以，现在有一个问题就是如何将2d视口的x和y坐标转换成three.js场景中的3d坐标。好在three.js已经有了解决相关问题的方案，那就是THREE.Raycaster射线，用于鼠标拾取（计算出鼠标移过的三维空间中的对象）
+
+        ray = new THREE.Raycaster();
+        ray.ray.direction.set(0, -1, 0);
+
+        // var light = new THREE.DirectionalLight(0xffffff, 1.5);
+        // light.position.set(1, 1, 1);
+        // light.castShadow=true;
+        // scene.add(light);
+
+        // var light = new THREE.DirectionalLight(0xffffff, 0.75);
+        // light.position.set(-1, - 0.5, -1);
+        // scene.add(light);
+
+        var ambientLight = new THREE.AmbientLight(0x001820);
+        scene.add(ambientLight);
+
+        // //添加聚光灯光源
+        // var spotLight = new THREE.SpotLight(0xffffff);
+        // spotLight.position.set(100, 100, 100);
+        // spotLight.castShadow = true;
+        // scene.add(spotLight);
+
+        //     var pointColor = sun_color;
+        // var pointLight = new THREE.PointLight(pointColor);
+        // pointLight.castShadow = true;
+        // pointLight.distance = 1000;
+        // pointLight.position.set(sun_posi);
+        // console.log(pointLight.position)
+        // pointLight.intensity = 3;
+        // scene.add(pointLight);
+        var light = new THREE.AmbientLight(0x020202)
+        scene.add(light)
+        // var light	= new THREE.DirectionalLight('white', 1)
+        // light.position.set(500, 500, 200)
+        // scene.add( light )
+
+        var pointColor = sun_color;
+        var spotLight = new THREE.SpotLight(pointColor);
+        spotLight.position.set(500, 500, 500);
+        console.log(spotLight.position)
+        spotLight.castShadow = true;
+        spotLight.shadowCameraNear = 2;
+        spotLight.shadowCameraFar = 200;
+        spotLight.shadowCameraFov = 40;
+        var target = new THREE.Object3D();
+        target.position = new THREE.Vector3(0, 10, 0);
+        spotLight.target = target;
+        spotLight.distance = 0;
+        spotLight.angle = 0.9;
+        scene.add(spotLight);
+
+        //////////////////////////////////////////////////////////////////////////////////
+        //		grass ground							//
+        //////////////////////////////////////////////////////////////////////////////////
+
+        var textureUrl = '../static/images/grasslight-small.jpg'
+        var texture = THREE.ImageUtils.loadTexture(textureUrl);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.x = 100
+        texture.repeat.y = 100
+        texture.anisotropy = renderer.getMaxAnisotropy()
+
+        // build object3d
+        var geometry1 = new THREE.PlaneGeometry(2000, 2000)
+        var material = new THREE.MeshPhongMaterial({
+            map: texture,
+            emissive: 'green',
+        })
+        var object3d = new THREE.Mesh(geometry1, material)
+        object3d.rotateX(-Math.PI / 2)
+        object3d.receiveShadow = true
+        // object3d.position.set(10,10,10)
+        scene.add(object3d)
+
+
+        // floor
+        // floor
+        //创建一个平面
+        //**width **：沿着X轴的宽度，默认值为1
+        // height：沿着Y轴的高度，默认为1
+        // **widthSegments **：宽度分段数，默认为1
+        // heightSegments：高度分段数，默认为1
+        // geometry = new THREE.PlaneGeometry(2000, 2000, 100, 100);
+        // //默认是垂直面，旋转90度
+        // geometry.applyMatrix(new THREE.Matrix4().makeRotationX(- Math.PI / 2));
+        // // alert(geometry.vertices.length)
+        // //10201
+        // //随机地板
+        // for (var i = 0, l = geometry.vertices.length; i < l; i++) {
+        //     var vertex = geometry.vertices[i];
+        //     vertex.x += Math.random() * 20 - 10;
+        //     vertex.y += Math.random() * 2;
+        //     vertex.z += Math.random() * 20 - 10;
+        // }
+        //20000
+        // alert(geometry.faces.length)
+        // for (var i = 0, l = geometry.faces.length; i < l; i++) {
+        //     var face = geometry.faces[i];
+        //     face.color = new THREE.Color(Math.random() * 0.2, Math.random() * 0.2 + 0.65, Math.random() * 0.25);
+
+        // }
+        //应用设置的颜色
+        // material = new THREE.MeshBasicMaterial({ vertexColors: THREE.FaceColors });
+        var material = new THREE.MeshLambertMaterial({color: 0xFFFFFF, side: THREE.DoubleSide});
+        mesh = new THREE.Mesh(geometry, material);
+        mesh.receiveShadow = true;
+        scene.add(mesh);
+
+        var datGui = new dat.GUI();
+        var color_controls = new function () {
+            this.scene_color = "#3AA0EA"; // CSS string
+            this.fog_dense = 50;
+            this.sun_color = "#ffffff"
+
+        };
+
+
+        var colorFolder = datGui.addFolder('颜色控制');
+        datGui.addColor(color_controls, 'scene_color').onChange(function (val) {
+            //改变对象属性值
+            scene_color = val;
+            // console.log(velocity.y)
+            renderer.setClearColor(scene_color);
+            scene.fog = new THREE.Fog(scene_color, 0, 750);
+            renderer.render(scene, camera);
+
+
+        });
+        datGui.add(color_controls, 'fog_dense', 1, 2000).onChange(function (val) {
+            //改变对象属性值
+            // console.log(velocity.y)
+            scene.fog = new THREE.Fog(scene_color, 0, val);
+            renderer.render(scene, camera);
+
+
+        });
+        datGui.addColor(color_controls, 'sun_color').onChange(function (val) {
+            //改变对象属性值
+            sun_color = val;
+            // console.log(velocity.y)
+            spotLight.color.set(val)
+            scene.fog = new THREE.Fog(scene_color, 0, 750);
+            renderer.render(scene, camera);
+
+
+        });
+
+
+        // objects
+        var spheregeometry = new THREE.SphereGeometry(30, 32, 32);
+        var spheregeomaterial = new THREE.MeshBasicMaterial({color: 0xFF4500})
+        var sphere = new THREE.Mesh(spheregeometry, spheregeomaterial)
+        sphere.position.set(500, 500, 500);
+        console.log(sphere.position)
+        scene.add(sphere)
+
+        var spheregeometry = new THREE.SphereGeometry(10, 32, 32);
+        var spheregeomaterial = new THREE.MeshBasicMaterial({color: 0xFF4500})
+        var sphere = new THREE.Mesh(spheregeometry, spheregeomaterial)
+        sphere.material.side = THREE.BackSide;
+        sphere.position.set(-80, 410, 60);
+        console.log(sphere.position)
+        scene.add(sphere)
+
+
+        geometry = new THREE.BoxGeometry(20, 20, 20);
+
+        for (var i = 0, l = geometry.faces.length; i < l; i++) {
+            var face = geometry.faces[i];
+            face.vertexColors[0] = new THREE.Color().setHSL(Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
+            face.vertexColors[1] = new THREE.Color().setHSL(Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
+            face.vertexColors[2] = new THREE.Color().setHSL(Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
+        }
+
+        // for (var i = 0; i < 500; i++) {
+        //     material = new THREE.MeshPhongMaterial({ specular: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors });
+        //     var mesh = new THREE.Mesh(geometry, material);
+        //     mesh.position.x = Math.floor(Math.random() * 20 - 10) * 20;
+        //     mesh.position.y = Math.floor(Math.random() * 20) * 20 + 10;
+        //     mesh.position.z = Math.floor(Math.random() * 20 - 10) * 20;
+        //     console.log(mesh.position)
+        //     mesh.castShadow = true;
+        //     mesh.receiveShadow = true;
+        //     scene.add(mesh);
+        //     material.color.setHSL(Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
+        //     objects.push(mesh);
+        // }
+
+        for (i in cubes) {
+            material = new THREE.MeshPhongMaterial({
+                specular: 0xffffff,
+                shading: THREE.FlatShading,
+                vertexColors: THREE.VertexColors
+            });
+            var mesh = new THREE.Mesh(geometry, material);
+            // console.log(cubes[i])
+            mesh.position.x = cubes[i][0];
+            mesh.position.y = cubes[i][1];
+            mesh.position.z = cubes[i][2];
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+            material.color.setHSL(Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
+            objects.push(mesh);
+        }
+
+
+        //阴影渲染
+        renderer.shadowMap.enable = true;
+        renderer.setClearColor(scene_color);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+
+        window.addEventListener('resize', onWindowResize, false);
+    }
+
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.isOnObject(false);
+        ray.ray.origin.copy(controls.getObject().position);
+        ray.ray.origin.y -= 10;
+        var intersections = ray.intersectObjects(objects);
+        if (intersections.length > 0) {
+            var distance = intersections[0].distance;
+            if (distance > 0 && distance < 10) {
+                controls.isOnObject(true);
+            }
+        }
+
+        controls.update();
+        renderer.render(scene, camera);
+        // console.log(scene)
+    }
+
+
+</script>
+<script>
+    function hidder() {
+        document.getElementById('zhezhao').style.display = "none";
+        document.getElementById('tankuang').style.display = "none";
+    }
+</script>
+</body>
+
+</html>
